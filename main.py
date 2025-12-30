@@ -1,6 +1,8 @@
+import shutil
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import tempfile
 import os
 import re
 import subprocess
@@ -29,13 +31,28 @@ async def on_message(message: discord.Message):
         return
 
     matches = re.search(r";grug[\n]+```grug\n(.*)```", message.content, re.DOTALL)
+    if matches == None:
+        matches = re.search(r";grug[\n]+```rs\n(.*)```", message.content, re.DOTALL)
+    if matches == None:
+        matches = re.search(r";grug[\n]+```py\n(.*)```", message.content, re.DOTALL)
+
     if matches != None:
+        idx = 0
+        while True:
+            path = os.path.join(
+                tempfile.gettempdir(),
+                f"grug-eval-context-{idx}"
+            )
+            if not os.path.exists(path):
+                break
+            idx += 1
         code = matches.group(1)
         result = subprocess.run(
-            ["python3", "grug_eval.py", code],
+            ["python3", "grug_eval.py", code, path],
             capture_output=True,
             text=True
         )
+        shutil.rmtree(path)
         await message.channel.send(f"{message.author.mention}\n{result.stdout}")
 
 bot.run(token)
