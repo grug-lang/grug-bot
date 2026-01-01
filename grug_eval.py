@@ -32,14 +32,10 @@ from grug.packages import grug_stdlib, grug_numpy
 
 state = grug.init(
     packages=[
-        grug_stdlib.get().noprefix(),
-        grug_numpy.get().noprefix(),
+        grug_stdlib.get(),
+        grug_numpy.get(),
     ]
 )
-
-@state.game_fn
-def print_string(code: str):
-    print(code)
 
 try:
     file = state.compile_grug_file("THE_MOD/code-Script.grug")
